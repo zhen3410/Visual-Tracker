@@ -21,12 +21,48 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Sequences.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="bbox.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Visual Tracker.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Tracker.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="fhog.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="gradientMex.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="wrappers.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="sse.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="Visual Tracker.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Tracker.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="gradientMex.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Sequences.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
