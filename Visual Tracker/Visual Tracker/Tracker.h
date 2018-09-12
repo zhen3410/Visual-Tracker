@@ -28,7 +28,7 @@ public:
 	std::vector<cv::Mat> get_features(cv::Mat img, cv::Mat cos_window)const;
 	std::vector<cv::Mat> get_hog(cv::Mat img)const;
 	cv::Mat Gaussian_kernel(std::vector<cv::Mat> xf, std::vector<cv::Mat> yf)const;
-	cv::Mat div_pointwise(cv::Mat x, cv::Mat y)const;
+	cv::Mat div_pointwise(cv::Mat x,cv::Mat y)const;
 
 
 private:

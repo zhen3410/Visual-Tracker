@@ -57,7 +57,7 @@ void KCF::run(Video *seq)const
 
 		cv::Mat kf = Gaussian_kernel(xf, xf);
 
-
+		cv::Mat alpha_f = div_pointwise(yf, (kf + lambda));
 	}
 }
 
@@ -194,7 +194,17 @@ cv::Mat KCF::Gaussian_kernel(std::vector<cv::Mat> xf, std::vector<cv::Mat> yf) c
 	return kf;
 }
 
-cv::Mat KCF::div_pointwise(cv::Mat x, cv::Mat y) const
+cv::Mat KCF::div_pointwise(cv::Mat x,cv::Mat y) const
 {
-	return cv::Mat();
+	cv::Mat res(x.size(), CV_32F);
+	float *ptr_res = res.ptr<float>();
+	float *ptr_x = x.ptr<float>();
+	float *ptr_y = y.ptr<float>();
+	for (int i = 0; i < x.rows; i++) {
+		for (int j = 0; j < x.cols; j++) {
+			ptr_res[i*x.rows + j] = ptr_x[i*x.rows + j] / ptr_y[i*y.rows + j];
+		}
+	}
+
+	return res;
 }
