@@ -43,7 +43,20 @@ void KCF::run(Video *seq)const
 		if (img.dims > 1) {
 			cv::cvtColor(img, img, CV_RGB2GRAY);
 		}
+
+		cv::Mat model_alphaf;
+		std::vector<cv::Mat> model_xf;
 		if (frame > 0) {
+			cv::Mat patch = get_subwindow(img, target_pos, window_size);
+			std::vector<cv::Mat> x = get_features(patch, cos_window);
+			std::vector<cv::Mat> xf(x.size());
+			for (int i = 0; i < x.size(); i++)
+				cv::dft(x[i], xf[i], cv::DFT_COMPLEX_OUTPUT);
+			cv::Mat kzf = Gaussian_kernel(xf, model_xf);
+			cv::Mat responsef = model_alphaf.mul(kzf);
+			cv::Mat response;
+			cv::idft(responsef, response, cv::DFT_REAL_OUTPUT | cv::DFT_SCALE);
+
 
 		}
 
@@ -58,6 +71,20 @@ void KCF::run(Video *seq)const
 		cv::Mat kf = Gaussian_kernel(xf, xf);
 
 		cv::Mat alpha_f = div_pointwise(yf, (kf + lambda));
+
+
+		if (frame == 0) {
+			model_alphaf = alpha_f;
+			model_xf = xf;
+		}
+		else {
+			model_alphaf = (1 - interp_factor)*model_alphaf + interp_factor * alpha_f;
+			int len = model_xf.size();
+			for (int i = 0; i < len; i++)
+				model_xf[i] = (1 - interp_factor)*model_xf[i] + interp_factor * xf[i];
+		}
+
+
 	}
 }
 
@@ -162,6 +189,10 @@ std::vector<cv::Mat> KCF::get_features(cv::Mat img, cv::Mat cos_window) const
 		feature.push_back(img.clone());
 	}
 
+	int dim = feature.size();
+	for (int i = 0; i < dim; i++)
+		feature[i] = feature[i].mul(cos_window);
+
 	return feature;
 }
 
@@ -196,15 +227,18 @@ cv::Mat KCF::Gaussian_kernel(std::vector<cv::Mat> xf, std::vector<cv::Mat> yf) c
 
 cv::Mat KCF::div_pointwise(cv::Mat x,cv::Mat y) const
 {
-	cv::Mat res(x.size(), CV_32F);
-	float *ptr_res = res.ptr<float>();
-	float *ptr_x = x.ptr<float>();
-	float *ptr_y = y.ptr<float>();
-	for (int i = 0; i < x.rows; i++) {
-		for (int j = 0; j < x.cols; j++) {
-			ptr_res[i*x.rows + j] = ptr_x[i*x.rows + j] / ptr_y[i*y.rows + j];
-		}
-	}
+	cv::Mat res;
+	std::vector<cv::Mat> plane1;
+	cv::split(x, plane1);
+	std::vector<cv::Mat> plane2;
+	cv::split(y, plane2);
+	cv::Mat c2_d2 = plane2[0].mul(plane2[0]) + plane2[1].mul(plane2[1]);
+	std::vector<cv::Mat> res_t;
+	res_t[0] = plane1[0].mul(plane2[0]) + plane1[1].mul(plane2[1]);
+	res_t[0] = res_t[0] / c2_d2;
+	res_t[1] = plane1[1].mul(plane2[0]) - plane1[0].mul(plane2[1]);
+	res_t[1] = res_t[1] / c2_d2;
+	cv::merge(res_t, res);
 
 	return res;
 }

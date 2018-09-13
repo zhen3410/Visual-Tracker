@@ -35,6 +35,7 @@ private:
 	std::string kernel_type = "Gaussian";
 	std::string feature_type = "Hog";
 
+	float interp_factor = 0.02;
 	float kernel_sigma = 0.5;
 	float padding = 1.5;
 	float lambda = 1e-4;
