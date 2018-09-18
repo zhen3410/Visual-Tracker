@@ -20,16 +20,16 @@ public:
 	void run(Video *seq)const;
 
 	cv::Mat CreateGaussian1D(int len, float sigma)const;
-	cv::Mat CreateGaussian2D(cv::Size sz, float sigma)const;
-	cv::Mat GetGaussianSharpLabels(cv::Size sz, float sigma)const;
-	cv::Mat CircShift(cv::Mat src, cv::Size V)const;
+	cv::Mat CreateGaussian2D(const cv::Size &sz,const float &sigma)const;
+	cv::Mat GetGaussianSharpLabels(const cv::Size &sz,const float &sigma)const;
+	cv::Mat CircShift(const cv::Mat &src, const cv::Size &V)const;
 	cv::Mat hann(int len)const;
-	cv::Mat get_subwindow(cv::Mat img, cv::Point pos, cv::Size sz)const;
-	std::vector<cv::Mat> get_features(cv::Mat img, cv::Mat cos_window)const;
-	std::vector<cv::Mat> get_hog(cv::Mat img)const;
-	cv::Mat Gaussian_kernel(std::vector<cv::Mat> xf, std::vector<cv::Mat> yf)const;
-	cv::Mat div_pointwise(cv::Mat x,cv::Mat y)const;
-
+	cv::Mat get_subwindow(const cv::Mat &img, cv::Point pos, cv::Size sz)const;
+	std::vector<cv::Mat> get_features(const cv::Mat &img, cv::Mat cos_window)const;
+	std::vector<cv::Mat> get_hog(const cv::Mat &img)const;
+	cv::Mat Gaussian_kernel(const std::vector<cv::Mat> &xf,const std::vector<cv::Mat> &yf)const;
+	cv::Mat div_pointwise(const cv::Mat &x,const cv::Mat &y)const;
+	cv::Point find_max(const cv::Mat&)const;
 
 private:
 	std::string kernel_type = "Gaussian";

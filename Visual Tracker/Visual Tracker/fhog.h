@@ -1,11 +1,10 @@
 #pragma once
-#pragma once
 #include<vector>
 #include<opencv2/opencv.hpp>
 
 #include"gradientMex.h"
 
-std::vector<cv::Mat> fhog(cv::Mat img, int use_hog = 2, int cell_size = 4, int n_orients = 9, int soft_bin = -1, float clip = 0.2) {
+std::vector<cv::Mat> fhog(const cv::Mat &img, int use_hog = 2, int cell_size = 4, int n_orients = 9, int soft_bin = -1, float clip = 0.2) {
 	int h = img.rows, w = img.cols, d = 1;
 	bool full = true;
 	if (h < 2 || w < 2) {
@@ -13,10 +12,12 @@ std::vector<cv::Mat> fhog(cv::Mat img, int use_hog = 2, int cell_size = 4, int n
 		return std::vector<cv::Mat>();
 	}
 
-	float *I = new float[h*w];
+	float* I = new float[h*w];
+	const float* ptr_img = img.ptr<float>();
 	for (int i = 0; i < w; i++) {
 		for (int j = 0; j < h; j++) {
-			I[i*h + j] = img.at<float>(j, i);
+			//I[i*h + j] = img.at<float>(j, i);
+			I[i*h + j] = ptr_img[i*h + j];
 		}
 	}
 

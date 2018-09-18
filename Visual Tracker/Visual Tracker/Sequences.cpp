@@ -24,11 +24,11 @@ void Video::init() {
 		std::size_t file_ex_pos = filename.find_last_of(".");
 		std::string file_ex = filename.substr(file_ex_pos + 1);
 		if (file_ex == "jpg" || file_ex == "png" || file_ex == "bmp") {
-			std::string file_path = path + "/" + filename;
+			std::string file_path = path + "\\" + filename;
 			img_path.push_back(file_path);
 		}
 		else if (file_ex == "txt") {
-			std::string file_path = path + "/" + filename;
+			std::string file_path = path + "\\" + filename;
 			std::ifstream in(file_path);
 			std::string line;
 			while (getline(in, line)) {
