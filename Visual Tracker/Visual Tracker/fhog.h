@@ -13,11 +13,9 @@ std::vector<cv::Mat> fhog(const cv::Mat &img, int use_hog = 2, int cell_size = 4
 	}
 
 	float* I = new float[h*w];
-	const float* ptr_img = img.ptr<float>();
 	for (int i = 0; i < w; i++) {
 		for (int j = 0; j < h; j++) {
-			//I[i*h + j] = img.at<float>(j, i);
-			I[i*h + j] = ptr_img[i*h + j];
+			I[i*h + j] = img.at<uchar>(j, i);
 		}
 	}
 

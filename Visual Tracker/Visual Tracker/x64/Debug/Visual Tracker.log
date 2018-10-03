@@ -1,29 +1,62 @@
-﻿  Tracker.cpp
+﻿  Sequences.cpp
 d:\opencv3.1\opencv\build\include\opencv2\core\mat.hpp(1964): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 d:\opencv3.1\opencv\build\include\opencv2\core\persistence.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 d:\opencv3.1\opencv\build\include\opencv2\core\utility.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 d:\opencv3.1\opencv\build\include\opencv2\core\utility.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.h(38): warning C4305: “初始化”: 从“double”到“float”截断
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.h(41): warning C4305: “初始化”: 从“double”到“float”截断
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.h(42): warning C4305: “初始化”: 从“double”到“float”截断
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(19): warning C4244: “=”: 从“float”转换到“int”，可能丢失数据
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(20): warning C4244: “=”: 从“float”转换到“int”，可能丢失数据
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(22): warning C4244: “=”: 从“float”转换到“int”，可能丢失数据
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(23): warning C4244: “=”: 从“float”转换到“int”，可能丢失数据
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(26): warning C4244: “=”: 从“float”转换到“int”，可能丢失数据
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(27): warning C4244: “=”: 从“float”转换到“int”，可能丢失数据
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(29): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(137): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(155): warning C4244: “参数”: 从“double”转换到“int”，可能丢失数据
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(200): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(203): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(213): warning C4244: “参数”: 从“double”转换到“int”，可能丢失数据
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(214): warning C4244: “参数”: 从“double”转换到“int”，可能丢失数据
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(224): warning C4067: 预处理器指令后有意外标记 - 应输入换行符
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(225): warning C4067: 预处理器指令后有意外标记 - 应输入换行符
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(241): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(261): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(306): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(307): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
-d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(312): warning C4244: “参数”: 从“float”转换到“int”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\bbox.h(7): warning C4244: “=”: 从“const int”转换到“float”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\sequences.cpp(37): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\sequences.cpp(89): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
+  main.cpp
+d:\opencv3.1\opencv\build\include\opencv2\core\mat.hpp(1964): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+d:\opencv3.1\opencv\build\include\opencv2\core\persistence.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+d:\opencv3.1\opencv\build\include\opencv2\core\utility.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+d:\opencv3.1\opencv\build\include\opencv2\core\utility.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\bbox.h(7): warning C4244: “=”: 从“const int”转换到“float”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.h(40): warning C4305: “初始化”: 从“double”到“float”截断
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.h(43): warning C4305: “初始化”: 从“double”到“float”截断
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.h(44): warning C4305: “初始化”: 从“double”到“float”截断
+  Tracker.cpp
+d:\opencv3.1\opencv\build\include\opencv2\core\mat.hpp(1964): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+d:\opencv3.1\opencv\build\include\opencv2\core\persistence.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+d:\opencv3.1\opencv\build\include\opencv2\core\utility.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+d:\opencv3.1\opencv\build\include\opencv2\core\utility.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\bbox.h(7): warning C4244: “=”: 从“const int”转换到“float”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.h(40): warning C4305: “初始化”: 从“double”到“float”截断
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.h(43): warning C4305: “初始化”: 从“double”到“float”截断
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.h(44): warning C4305: “初始化”: 从“double”到“float”截断
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(30): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(31): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(32): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(33): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(37): warning C4244: “=”: 从“float”转换到“int”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(38): warning C4244: “=”: 从“float”转换到“int”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(40): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(130): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(166): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(169): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(189): warning C4244: “参数”: 从“float”转换到“int”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(234): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(237): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(247): warning C4244: “参数”: 从“double”转换到“int”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(248): warning C4244: “参数”: 从“double”转换到“int”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(258): warning C4067: 预处理器指令后有意外标记 - 应输入换行符
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(259): warning C4067: 预处理器指令后有意外标记 - 应输入换行符
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(275): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(296): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(300): warning C4244: “+=”: 从“double”转换到“float”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(301): warning C4244: “+=”: 从“double”转换到“float”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(364): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(365): warning C4244: “=”: 从“int”转换到“float”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.cpp(370): warning C4244: “参数”: 从“float”转换到“int”，可能丢失数据
+  Visual Tracker.cpp
+d:\opencv3.1\opencv\build\include\opencv2\core\mat.hpp(1964): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+d:\opencv3.1\opencv\build\include\opencv2\core\persistence.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+d:\opencv3.1\opencv\build\include\opencv2\core\utility.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+d:\opencv3.1\opencv\build\include\opencv2\core\utility.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\bbox.h(7): warning C4244: “=”: 从“const int”转换到“float”，可能丢失数据
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.h(40): warning C4305: “初始化”: 从“double”到“float”截断
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.h(43): warning C4305: “初始化”: 从“double”到“float”截断
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\tracker.h(44): warning C4305: “初始化”: 从“double”到“float”截断
+  正在生成代码...
+d:\visual tracker\visual-tracker\visual tracker\visual tracker\visual tracker.cpp(19): warning C4715: “Visual_Tracker::run”: 不是所有的控件路径都返回值
   Visual Tracker.vcxproj -> D:\Visual Tracker\Visual-Tracker\Visual Tracker\x64\Debug\Visual Tracker.exe

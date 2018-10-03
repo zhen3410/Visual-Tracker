@@ -13,7 +13,7 @@ class Visual_Tracker {
 public:
 	Visual_Tracker() {};
 	Visual_Tracker(Video* s) { seq = s; }
-	void run(int ind);
+	vector<bbox> run(int ind);
 private:
 	Video * seq;
 };

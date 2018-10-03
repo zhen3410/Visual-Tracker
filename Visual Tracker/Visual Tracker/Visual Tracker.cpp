@@ -5,7 +5,7 @@
 #include"Visual Tracker.h"
 using namespace std;
 
-void Visual_Tracker::run(int choose_number) {
+vector<bbox> Visual_Tracker::run(int choose_number) {
 	cout << "***********Video Tracking************" << endl;
 	//cout << "Please Choose Video:" << endl;
 	cout << "KCF Algorithm!!!" << endl;
@@ -13,6 +13,7 @@ void Visual_Tracker::run(int choose_number) {
 	{
 	case 1:
 		KCF KCF_tracker;
-		KCF_tracker.run(seq);
+		vector<bbox> result = KCF_tracker.run(seq);
+		return result;
 	}
 }
