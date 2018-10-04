@@ -65,6 +65,7 @@ void Video::init() {
 					temp.w = box[0] + box[2] / 2;
 					temp.h = box[1] + box[3] / 2;
 					ground_truth.push_back(temp);
+					ground_truth_otb.push_back(cv::Rect(box[0], box[1], box[2], box[3]));
 				}
 				else if (box.size() == 8) {
 					bbox temp;
@@ -80,6 +81,8 @@ void Video::init() {
 					temp.w = s * (x2 - x1) + 1;
 					temp.h = s * (y2 - y1) + 1;
 					ground_truth.push_back(temp);
+
+					ground_truth_otb.push_back(cv::Rect(temp.x - temp.w / 2, temp.y - temp.h / 2, temp.w, temp.h));
 				}
 			}
 		}

@@ -12,18 +12,12 @@
 
 
 
-std::vector<bbox> KCF::run(Video *seq)const
+void KCF::init(bbox groundtruth)
 {
-	std::vector<bbox> result;
-	//std::cout << "test complete!" << std::endl;
-	cv::namedWindow("Tracking Video", cv::WINDOW_AUTOSIZE);
-
-	cv::Point target_pos;
-	target_pos.x = (int)seq->ground_truth[0].x;
-	target_pos.y = (int)seq->ground_truth[0].y;
-	cv::Size target_sz;
-	target_sz.width = (int)seq->ground_truth[0].w;
-	target_sz.height = (int)seq->ground_truth[0].h;
+	target_pos.x = (int)groundtruth.x;
+	target_pos.y = (int)groundtruth.y;
+	target_sz.width = (int)groundtruth.w;
+	target_sz.height = (int)groundtruth.h;
 
 	bool resize_image = (sqrt(target_sz.width*target_sz.height) >= 100);
 	if (resize_image) {
@@ -33,7 +27,6 @@ std::vector<bbox> KCF::run(Video *seq)const
 		target_sz.height = floor(target_sz.height / 2.);
 	}
 
-	cv::Size window_size;
 	window_size.width = floor(target_sz.width*(1 + padding));
 	window_size.height = floor(target_sz.height*(1 + padding));
 
@@ -43,123 +36,88 @@ std::vector<bbox> KCF::run(Video *seq)const
 	use_sz.height = window_size.height / cell_size;
 	cv::Mat y = GetGaussianSharpLabels(use_sz, output_sigma);
 
-	cv::Mat yf;
 	cv::dft(y, yf, cv::DFT_COMPLEX_OUTPUT);
 
-	cv::Mat cos_window(use_sz, CV_32F);
 	cos_window = hann(use_sz.height)*hann(use_sz.width).t();
 
+}
 
-	int video_len = seq->length;
+bbox KCF::run(cv::Mat img,int frame)
+{
+	bbox result;
 
-	
-	cv::Mat model_alphaf;
-	std::vector<cv::Mat> model_xf;
+	cv::Mat img_o = img;
 
-	for (int frame = 0; frame < video_len; frame++) {
-		cv::String path = seq->img_path[frame];
-		cv::Mat img = cv::imread(path);
-		cv::Mat img_o = img;
+	if (resize_image)cv::resize(img, img, cv::Size(), 0.5, 0.5);
 
-		if (resize_image)cv::resize(img, img, cv::Size(), 0.5, 0.5);
-
-		//cv::imshow("Tracking Video", img);
-
-		if (img.channels() > 1) {
-			cv::Mat img_temp = img;
-			cv::cvtColor(img_temp, img, CV_BGR2GRAY);
-		}
-
-		if (frame > 0) {
-			cv::Mat patch = get_subwindow(img, target_pos, window_size);
-
-			cv::imshow("patch", patch);
-			cv::waitKey(0);
-
-			std::vector<cv::Mat> x = get_features(patch, cos_window);
-			std::vector<cv::Mat> xf(x.size());
-			for (int i = 0; i < x.size(); i++)
-				cv::dft(x[i], xf[i], cv::DFT_COMPLEX_OUTPUT);
-			cv::Mat kzf = Gaussian_kernel(xf, model_xf);
-			cv::Mat responsef = mul_pointwise(model_alphaf, kzf);
-			cv::Mat response;
-			cv::idft(responsef, response, cv::DFT_REAL_OUTPUT | cv::DFT_SCALE);
-
-			
-			cv::Point delta;
-			cv::minMaxLoc(response, NULL, NULL, NULL, &delta);
-			//delta = find_max(response);
-
-
-			if ((delta.x+1) > (x[0].cols / 2)) {
-				delta.x -= x[0].cols;
-			}
-			if ((delta.y+1) > (x[0].rows / 2)) {
-				delta.y -= x[0].rows;
-			}
-
-			target_pos = target_pos + cell_size * (delta);
-
-			//cv::imshow("Tracking Video", response);
-			//cv::waitKey(0);
-
-		}
-
-		cv::Mat patch = get_subwindow(img, target_pos, window_size);
-		cv::imshow("patch", patch);
-		cv::waitKey(0);
-
-		std::vector<cv::Mat> x = get_features(patch, cos_window);
-
-		std::vector<cv::Mat> xf(x.size());
-		for (int i = 0; i < x.size(); i++) {
-			cv::dft(x[i], xf[i], cv::DFT_COMPLEX_OUTPUT);
-		}
-
-		cv::Mat kf = Gaussian_kernel(xf, xf);
-
-		cv::Mat alpha_f = div_pointwise(yf, (kf + cv::Scalar(lambda,0)));
-
-
-		if (frame == 0) {
-			model_alphaf = alpha_f;
-			model_xf = xf;
-		}
-		else {
-			model_alphaf = (1 - interp_factor)*model_alphaf + interp_factor * alpha_f;
-			int len = model_xf.size();
-			for (int i = 0; i < len; i++)
-				model_xf[i] = (1 - interp_factor)*model_xf[i] + interp_factor * xf[i];
-		}
-
-		result.push_back(bbox(target_pos, target_sz));
-
-		cv::Rect box;
-		box.x = target_pos.x - target_sz.width / 2;
-		box.y = target_pos.y - target_sz.height / 2;
-		box.width = target_sz.width;
-		box.height = target_sz.height;
-
-		if (resize_image) {
-			box.x *= 2;
-			box.y *= 2;
-			box.width *= 2;
-			box.height *= 2;
-		}
-
-		cv::putText(img_o, std::to_string(frame + 1), cv::Point(20, 40), 6, 1, cv::Scalar(0, 255, 255), 2);
-		cv::rectangle(img_o, box,cv::Scalar(0,255,255),2);
-		cv::imshow("Tracking Video", img_o);
-
-		cv::waitKey(0); 
+	if (img.channels() > 1) {
+		cv::Mat img_temp = img;
+		cv::cvtColor(img_temp, img, CV_BGR2GRAY);
 	}
 
-	cv::waitKey(0);
+	if (frame > 0) {
+		cv::Mat patch = get_subwindow(img, target_pos, window_size);
+
+		std::vector<cv::Mat> x = get_features(patch, cos_window);
+		std::vector<cv::Mat> xf(x.size());
+		for (int i = 0; i < x.size(); i++)
+			cv::dft(x[i], xf[i], cv::DFT_COMPLEX_OUTPUT);
+		cv::Mat kzf = Gaussian_kernel(xf, model_xf);
+		cv::Mat responsef = mul_pointwise(model_alphaf, kzf);
+		cv::Mat response;
+		cv::idft(responsef, response, cv::DFT_REAL_OUTPUT | cv::DFT_SCALE);
+
+			
+		cv::Point delta;
+		cv::minMaxLoc(response, NULL, NULL, NULL, &delta);
+		//delta = find_max(response);
+
+
+		if ((delta.x+1) > (x[0].cols / 2)) {
+			delta.x -= x[0].cols;
+		}
+		if ((delta.y+1) > (x[0].rows / 2)) {
+			delta.y -= x[0].rows;
+		}
+
+		target_pos = target_pos + cell_size * (delta);
+
+	}
+
+	cv::Mat patch = get_subwindow(img, target_pos, window_size);
+
+	std::vector<cv::Mat> x = get_features(patch, cos_window);
+
+	std::vector<cv::Mat> xf(x.size());
+	for (int i = 0; i < x.size(); i++) {
+		cv::dft(x[i], xf[i], cv::DFT_COMPLEX_OUTPUT);
+	}
+
+	cv::Mat kf = Gaussian_kernel(xf, xf);
+
+	cv::Mat alpha_f = div_pointwise(yf, (kf + cv::Scalar(lambda,0)));
+
+
+	if (frame == 0) {
+		model_alphaf = alpha_f;
+		model_xf = xf;
+	}
+	else {
+		model_alphaf = (1 - interp_factor)*model_alphaf + interp_factor * alpha_f;
+		int len = model_xf.size();
+		for (int i = 0; i < len; i++)
+			model_xf[i] = (1 - interp_factor)*model_xf[i] + interp_factor * xf[i];
+	}
+
+	if (resize_image)result=(bbox(target_pos * 2, target_sz * 2));
+	else result=(bbox(target_pos, target_sz));
+
+	res.push_back(result);
 
 	return result;
 }
 
-cv::Mat KCF::CreateGaussian1D(int len, float sigma)const
+cv::Mat KCF::CreateGaussian1D(int len, float sigma)
 {
 	cv::Mat label(len, 1, CV_32F);
 	float* label_ptr = label.ptr<float>();
@@ -173,7 +131,7 @@ cv::Mat KCF::CreateGaussian1D(int len, float sigma)const
 	return label;
 }
 
-cv::Mat KCF::CreateGaussian2D(const cv::Size &sz,const  float &sigma)const
+cv::Mat KCF::CreateGaussian2D(const cv::Size &sz,const  float &sigma)
 {
 	cv::Mat a = CreateGaussian1D(sz.width, sigma);
 	cv::Mat b = CreateGaussian1D(sz.height, sigma);
@@ -182,7 +140,7 @@ cv::Mat KCF::CreateGaussian2D(const cv::Size &sz,const  float &sigma)const
 	return lable;
 }
 
-cv::Mat KCF::GetGaussianSharpLabels(const cv::Size &sz, const float &sigma) const
+cv::Mat KCF::GetGaussianSharpLabels(const cv::Size &sz, const float &sigma)
 {
 	cv::Mat label = CreateGaussian2D(sz, sigma);
 
@@ -193,7 +151,7 @@ cv::Mat KCF::GetGaussianSharpLabels(const cv::Size &sz, const float &sigma) cons
 	return label;
 }
 
-cv::Mat KCF::CircShift(const cv::Mat &src, const cv::Size &V) const
+cv::Mat KCF::CircShift(const cv::Mat &src, const cv::Size &V)
 {
 	cv::Mat res(src.size(), CV_32F);
 
@@ -225,7 +183,7 @@ cv::Mat KCF::CircShift(const cv::Mat &src, const cv::Size &V) const
 	return res;
 }
 
-cv::Mat KCF::hann(int len) const
+cv::Mat KCF::hann(int len)
 {
 	cv::Mat res(len, 1, CV_32F);
 
@@ -240,7 +198,7 @@ cv::Mat KCF::hann(int len) const
 	return res;
 }
 
-cv::Mat KCF::get_subwindow(const cv::Mat &img, cv::Point pos, cv::Size sz) const
+cv::Mat KCF::get_subwindow(const cv::Mat &img, cv::Point pos, cv::Size sz)
 {
 #define min(a,b)            (((a) < (b)) ? (a) : (b))
 #define max(a,b)            (((a) > (b)) ? (a) : (b))
@@ -261,7 +219,7 @@ cv::Mat KCF::get_subwindow(const cv::Mat &img, cv::Point pos, cv::Size sz) const
 	return res;
 }
 
-std::vector<cv::Mat> KCF::get_features(const cv::Mat &img, const cv::Mat &cos_window) const
+std::vector<cv::Mat> KCF::get_features(const cv::Mat &img, const cv::Mat &cos_window)
 {
 	std::vector<cv::Mat> feature;
 
@@ -280,7 +238,7 @@ std::vector<cv::Mat> KCF::get_features(const cv::Mat &img, const cv::Mat &cos_wi
 	return res;
 }
 
-std::vector<cv::Mat> KCF::get_hog(const cv::Mat &img) const
+std::vector<cv::Mat> KCF::get_hog(const cv::Mat &img)
 {
 	std::vector<cv::Mat> res;
 
@@ -289,7 +247,7 @@ std::vector<cv::Mat> KCF::get_hog(const cv::Mat &img) const
 	return res;
 }
 
-cv::Mat KCF::Gaussian_kernel(const std::vector<cv::Mat> &xf, const std::vector<cv::Mat> &yf) const
+cv::Mat KCF::Gaussian_kernel(const std::vector<cv::Mat> &xf, const std::vector<cv::Mat> &yf)
 {
 	cv::Size sz = xf[0].size();
 	int N = sz.width*sz.height;
@@ -310,7 +268,7 @@ cv::Mat KCF::Gaussian_kernel(const std::vector<cv::Mat> &xf, const std::vector<c
 	return kf;
 }
 
-cv::Mat KCF::div_pointwise(const cv::Mat &x,const cv::Mat &y) const
+cv::Mat KCF::div_pointwise(const cv::Mat &x,const cv::Mat &y)
 {
 	cv::Mat res;
 	//std::vector<cv::Mat> plane1;
@@ -333,7 +291,7 @@ cv::Mat KCF::div_pointwise(const cv::Mat &x,const cv::Mat &y) const
 	return res;
 }
 
-cv::Mat KCF::mul_pointwise(const cv::Mat & x, const cv::Mat & y) const
+cv::Mat KCF::mul_pointwise(const cv::Mat & x, const cv::Mat & y)
 {
 	cv::Mat res;
 
@@ -351,7 +309,7 @@ cv::Mat KCF::mul_pointwise(const cv::Mat & x, const cv::Mat & y) const
 }
 
 
-cv::Point KCF::find_max(const cv::Mat &x) const
+cv::Point KCF::find_max(const cv::Mat &x)
 {
 	cv::Point res;
 

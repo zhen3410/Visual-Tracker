@@ -17,4 +17,6 @@ public:
 
 	std::vector<bbox> ground_truth;
 
+	std::vector<cv::Rect> ground_truth_otb;
+
 };
