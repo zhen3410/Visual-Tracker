@@ -348,6 +348,33 @@ void BACF::init(bbox groundtruth) {
 	target_sz.height = groundtruth.h;
 
 	int search_area=(int)(target_sz.width/cell_size)*(target_sz.height/cell_size);
+	if (search_area > filter_max_area) {
+		current_scale_factor = sqrt(search_area / filter_max_area);
+	}
+	cv::Size base_target_sz(target_sz.width / current_scale_factor, target_sz.height / current_scale_factor);
+
+	if (search_area_shape == "square") {
+		int w_temp = sqrt(base_target_sz.width*search_area_scale*base_target_sz.height*search_area_scale);
+		w_temp = std::round((double)w_temp / cell_size)*cell_size;
+		window_sz = cv::Size(w_temp, w_temp);
+	}
+	else if(search_area_shape == "proportional"){
+		int w_temp = base_target_sz.width*search_area_scale;
+		int h_temp = base_target_sz.height*search_area_scale;
+		w_temp = std::round((double)w_temp / cell_size)*cell_size;
+		h_temp = std::round((double)h_temp / cell_size)*cell_size;
+		window_sz = cv::Size(w_temp, h_temp);
+	}
+	else {
+		std::cerr << "Unknown search_area_shape, must be 'square' or 'proportional'" << std::endl;
+	}
+
+	cv::Size use_sz(window_sz.width / cell_size, window_sz.height / cell_size);
+	float output_sigma = sqrt(base_target_sz.width*base_target_sz.height)*output_sigma_factor / cell_size;
+	cv::Mat y = GetGaussianSharpLabels(use_sz, output_sigma);
+	cv::dft(y, yf, cv::DFT_COMPLEX_OUTPUT);
+
+	cos_window = hann(use_sz.height)*hann(use_sz.width).t();
 
 }
 

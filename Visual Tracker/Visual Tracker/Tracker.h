@@ -43,6 +43,9 @@ public:
 	void init(bbox);
 	bbox run(cv::Mat, int);
 private:
+	std::string search_area_shape = "square";
+	cv::Size window_sz;
+	double current_scale_factor = 1.0;
 	double learning_rate        = 0.013;
 	double output_sigma_factor  = (double)(1. / 16);
 	int    search_area_scale    = 5;
