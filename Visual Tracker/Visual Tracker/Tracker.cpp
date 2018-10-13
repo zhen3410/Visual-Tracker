@@ -6,118 +6,10 @@
 #include<imgproc.hpp>
 #include<string>
 
-
 #include"Tracker.h"
 #include"fhog.h"
 
-
-
-void KCF::init(bbox groundtruth)
-{
-	target_pos.x = (int)groundtruth.x;
-	target_pos.y = (int)groundtruth.y;
-	target_sz.width = (int)groundtruth.w;
-	target_sz.height = (int)groundtruth.h;
-
-	bool resize_image = (sqrt(target_sz.width*target_sz.height) >= 100);
-	if (resize_image) {
-		target_pos.x = floor(target_pos.x / 2.);
-		target_pos.y = floor(target_pos.y / 2.);
-		target_sz.width = floor(target_sz.width / 2.);
-		target_sz.height = floor(target_sz.height / 2.);
-	}
-
-	window_size.width = floor(target_sz.width*(1 + padding));
-	window_size.height = floor(target_sz.height*(1 + padding));
-
-	float output_sigma = sqrt(target_sz.width*target_sz.height)*output_sigma_factor / cell_size;
-	cv::Size use_sz;
-	use_sz.width = window_size.width / cell_size;
-	use_sz.height = window_size.height / cell_size;
-	cv::Mat y = GetGaussianSharpLabels(use_sz, output_sigma);
-
-	cv::dft(y, yf, cv::DFT_COMPLEX_OUTPUT);
-
-	cos_window = hann(use_sz.height)*hann(use_sz.width).t();
-
-}
-
-bbox KCF::run(cv::Mat img,int frame)
-{
-	bbox result;
-
-	cv::Mat img_o = img;
-
-	if (resize_image)cv::resize(img, img, cv::Size(), 0.5, 0.5);
-
-	if (img.channels() > 1) {
-		cv::Mat img_temp = img;
-		cv::cvtColor(img_temp, img, CV_BGR2GRAY);
-	}
-
-	if (frame > 0) {
-		cv::Mat patch = get_subwindow(img, target_pos, window_size);
-
-		std::vector<cv::Mat> x = get_features(patch, cos_window);
-		std::vector<cv::Mat> xf(x.size());
-		for (int i = 0; i < x.size(); i++)
-			cv::dft(x[i], xf[i], cv::DFT_COMPLEX_OUTPUT);
-		cv::Mat kzf = Gaussian_kernel(xf, model_xf);
-		cv::Mat responsef = mul_pointwise(model_alphaf, kzf);
-		cv::Mat response;
-		cv::idft(responsef, response, cv::DFT_REAL_OUTPUT | cv::DFT_SCALE);
-
-			
-		cv::Point delta;
-		cv::minMaxLoc(response, NULL, NULL, NULL, &delta);
-		//delta = find_max(response);
-
-
-		if ((delta.x+1) > (x[0].cols / 2)) {
-			delta.x -= x[0].cols;
-		}
-		if ((delta.y+1) > (x[0].rows / 2)) {
-			delta.y -= x[0].rows;
-		}
-
-		target_pos = target_pos + cell_size * (delta);
-
-	}
-
-	cv::Mat patch = get_subwindow(img, target_pos, window_size);
-
-	std::vector<cv::Mat> x = get_features(patch, cos_window);
-
-	std::vector<cv::Mat> xf(x.size());
-	for (int i = 0; i < x.size(); i++) {
-		cv::dft(x[i], xf[i], cv::DFT_COMPLEX_OUTPUT);
-	}
-
-	cv::Mat kf = Gaussian_kernel(xf, xf);
-
-	cv::Mat alpha_f = div_pointwise(yf, (kf + cv::Scalar(lambda,0)));
-
-
-	if (frame == 0) {
-		model_alphaf = alpha_f;
-		model_xf = xf;
-	}
-	else {
-		model_alphaf = (1 - interp_factor)*model_alphaf + interp_factor * alpha_f;
-		int len = model_xf.size();
-		for (int i = 0; i < len; i++)
-			model_xf[i] = (1 - interp_factor)*model_xf[i] + interp_factor * xf[i];
-	}
-
-	if (resize_image)result=(bbox(target_pos * 2, target_sz * 2));
-	else result=(bbox(target_pos, target_sz));
-
-	res.push_back(result);
-
-	return result;
-}
-
-cv::Mat KCF::CreateGaussian1D(int len, float sigma)
+cv::Mat Tracker::CreateGaussian1D(int len, float sigma)
 {
 	cv::Mat label(len, 1, CV_32F);
 	float* label_ptr = label.ptr<float>();
@@ -131,7 +23,7 @@ cv::Mat KCF::CreateGaussian1D(int len, float sigma)
 	return label;
 }
 
-cv::Mat KCF::CreateGaussian2D(const cv::Size &sz,const  float &sigma)
+cv::Mat Tracker::CreateGaussian2D(const cv::Size &sz,const  float &sigma)
 {
 	cv::Mat a = CreateGaussian1D(sz.width, sigma);
 	cv::Mat b = CreateGaussian1D(sz.height, sigma);
@@ -140,7 +32,7 @@ cv::Mat KCF::CreateGaussian2D(const cv::Size &sz,const  float &sigma)
 	return lable;
 }
 
-cv::Mat KCF::GetGaussianSharpLabels(const cv::Size &sz, const float &sigma)
+cv::Mat Tracker::GetGaussianSharpLabels(const cv::Size &sz, const float &sigma)
 {
 	cv::Mat label = CreateGaussian2D(sz, sigma);
 
@@ -151,7 +43,7 @@ cv::Mat KCF::GetGaussianSharpLabels(const cv::Size &sz, const float &sigma)
 	return label;
 }
 
-cv::Mat KCF::CircShift(const cv::Mat &src, const cv::Size &V)
+cv::Mat Tracker::CircShift(const cv::Mat &src, const cv::Size &V)
 {
 	cv::Mat res(src.size(), CV_32F);
 
@@ -183,7 +75,7 @@ cv::Mat KCF::CircShift(const cv::Mat &src, const cv::Size &V)
 	return res;
 }
 
-cv::Mat KCF::hann(int len)
+cv::Mat Tracker::hann(int len)
 {
 	cv::Mat res(len, 1, CV_32F);
 
@@ -198,7 +90,7 @@ cv::Mat KCF::hann(int len)
 	return res;
 }
 
-cv::Mat KCF::get_subwindow(const cv::Mat &img, cv::Point pos, cv::Size sz)
+cv::Mat Tracker::get_subwindow(const cv::Mat &img, cv::Point pos, cv::Size sz)
 {
 #define min(a,b)            (((a) < (b)) ? (a) : (b))
 #define max(a,b)            (((a) > (b)) ? (a) : (b))
@@ -219,7 +111,7 @@ cv::Mat KCF::get_subwindow(const cv::Mat &img, cv::Point pos, cv::Size sz)
 	return res;
 }
 
-std::vector<cv::Mat> KCF::get_features(const cv::Mat &img, const cv::Mat &cos_window)
+std::vector<cv::Mat> Tracker::get_features(const cv::Mat &img, const cv::Mat &cos_window,const std::string &feature_type)
 {
 	std::vector<cv::Mat> feature;
 
@@ -238,13 +130,180 @@ std::vector<cv::Mat> KCF::get_features(const cv::Mat &img, const cv::Mat &cos_wi
 	return res;
 }
 
-std::vector<cv::Mat> KCF::get_hog(const cv::Mat &img)
+std::vector<cv::Mat> Tracker::get_hog(const cv::Mat &img)
 {
 	std::vector<cv::Mat> res;
 
 	res = fhog(img);
 
 	return res;
+}
+
+cv::Mat Tracker::div_pointwise(const cv::Mat &x,const cv::Mat &y)
+{
+	cv::Mat res;
+	//std::vector<cv::Mat> plane1;
+	//cv::Mat plane1[] = { cv::Mat_<float>(x),cv::Mat::zeros(x.size(),CV_32F) };
+	cv::Mat plane1[2];
+	cv::split(x, plane1);
+	//std::vector<cv::Mat> plane2;
+	//cv::Mat plane2[] = { cv::Mat_<float>(y),cv::Mat::zeros(y.size(),CV_32F) };
+	cv::Mat plane2[2];
+	cv::split(y, plane2);
+	cv::Mat c2_d2 = plane2[0].mul(plane2[0]) + plane2[1].mul(plane2[1]);
+	//cv::Mat res_t[] = { cv::Mat_<float>(y),cv::Mat::zeros(y.size(),CV_32F) };
+	cv::Mat res_t[2];
+	res_t[0] = plane1[0].mul(plane2[0]) + plane1[1].mul(plane2[1]);
+	res_t[0] = res_t[0] / c2_d2;
+	res_t[1] = plane1[1].mul(plane2[0]) - plane1[0].mul(plane2[1]);
+	res_t[1] = res_t[1] / c2_d2;
+	cv::merge(res_t, 2, res);
+
+	return res;
+}
+
+cv::Mat Tracker::mul_pointwise(const cv::Mat & x, const cv::Mat & y)
+{
+	cv::Mat res;
+
+	cv::Mat plane1[2];
+	cv::split(x, plane1);
+	cv::Mat plane2[2];
+	cv::split(y, plane2);
+
+	cv::Mat res_t[2];
+	res_t[0] = plane1[0].mul(plane2[0]) - plane1[1].mul(plane2[1]);
+	res_t[1] = plane1[0].mul(plane2[1]) + plane1[1].mul(plane2[0]);
+	cv::merge(res_t, 2, res);
+
+	return res;
+}
+
+cv::Point Tracker::find_max(const cv::Mat &x)
+{
+	cv::Point res;
+
+	float max_x, max_y, max_v = 0;
+	int m = x.cols, n = x.rows;
+	for (int i = 0; i < m; i++) {
+		for (int j = 0; j < n; j++) {
+			if (x.at<float>(j,i) > max_v) {
+				max_v = x.at<float>(j, i);
+				max_x = i;
+				max_y = j;
+			}
+		}
+	}
+
+	return cv::Point(max_x, max_y);
+}
+
+//****************************************************************************************************************************************
+//KCF Algorithm programed by Zhang Zhen
+//J.F. Henriques,R. Caseiro,P. Martins,and J. Batista, "High-Speed Tracking with Kernelized Correlation Filters," in Trans. on PAMI, 2015.
+//KCF begin!
+
+void KCF::init(bbox groundtruth)
+{
+	target_pos.x = (int)groundtruth.x;
+	target_pos.y = (int)groundtruth.y;
+	target_sz.width = (int)groundtruth.w;
+	target_sz.height = (int)groundtruth.h;
+
+	bool resize_image = (sqrt(target_sz.width*target_sz.height) >= 100);
+	if (resize_image) {
+		target_pos.x = floor(target_pos.x / 2.);
+		target_pos.y = floor(target_pos.y / 2.);
+		target_sz.width = floor(target_sz.width / 2.);
+		target_sz.height = floor(target_sz.height / 2.);
+	}
+
+	window_size.width = floor(target_sz.width*(1 + padding));
+	window_size.height = floor(target_sz.height*(1 + padding));
+
+	float output_sigma = sqrt(target_sz.width*target_sz.height)*output_sigma_factor / cell_size;
+	cv::Size use_sz;
+	use_sz.width = window_size.width / cell_size;
+	use_sz.height = window_size.height / cell_size;
+	cv::Mat y = GetGaussianSharpLabels(use_sz, output_sigma);
+
+	cv::dft(y, yf, cv::DFT_COMPLEX_OUTPUT);
+
+	cos_window = hann(use_sz.height)*hann(use_sz.width).t();
+
+}
+
+bbox KCF::run(cv::Mat img, int frame)
+{
+	bbox result;
+
+	cv::Mat img_o = img;
+
+	if (resize_image)cv::resize(img, img, cv::Size(), 0.5, 0.5);
+
+	if (img.channels() > 1) {
+		cv::Mat img_temp = img;
+		cv::cvtColor(img_temp, img, CV_BGR2GRAY);
+	}
+
+	if (frame > 0) {
+		cv::Mat patch = get_subwindow(img, target_pos, window_size);
+
+		std::vector<cv::Mat> x = get_features(patch, cos_window, feature_type);
+		std::vector<cv::Mat> xf(x.size());
+		for (int i = 0; i < x.size(); i++)
+			cv::dft(x[i], xf[i], cv::DFT_COMPLEX_OUTPUT);
+		cv::Mat kzf = Gaussian_kernel(xf, model_xf);
+		cv::Mat responsef = mul_pointwise(model_alphaf, kzf);
+		cv::Mat response;
+		cv::idft(responsef, response, cv::DFT_REAL_OUTPUT | cv::DFT_SCALE);
+
+		cv::Point delta;
+		cv::minMaxLoc(response, NULL, NULL, NULL, &delta);
+		//delta = find_max(response);
+
+		if ((delta.x + 1) > (x[0].cols / 2)) {
+			delta.x -= x[0].cols;
+		}
+		if ((delta.y + 1) > (x[0].rows / 2)) {
+			delta.y -= x[0].rows;
+		}
+
+		target_pos = target_pos + cell_size * (delta);
+
+	}
+
+	cv::Mat patch = get_subwindow(img, target_pos, window_size);
+
+	std::vector<cv::Mat> x = get_features(patch, cos_window, feature_type);
+
+	std::vector<cv::Mat> xf(x.size());
+	for (int i = 0; i < x.size(); i++) {
+		cv::dft(x[i], xf[i], cv::DFT_COMPLEX_OUTPUT);
+	}
+
+	cv::Mat kf = Gaussian_kernel(xf, xf);
+
+	cv::Mat alpha_f = div_pointwise(yf, (kf + cv::Scalar(lambda, 0)));
+
+
+	if (frame == 0) {
+		model_alphaf = alpha_f;
+		model_xf = xf;
+	}
+	else {
+		model_alphaf = (1 - interp_factor)*model_alphaf + interp_factor * alpha_f;
+		int len = model_xf.size();
+		for (int i = 0; i < len; i++)
+			model_xf[i] = (1 - interp_factor)*model_xf[i] + interp_factor * xf[i];
+	}
+
+	if (resize_image)result = (bbox(target_pos * 2, target_sz * 2));
+	else result = (bbox(target_pos, target_sz));
+
+	res.push_back(result);
+
+	return result;
 }
 
 cv::Mat KCF::Gaussian_kernel(const std::vector<cv::Mat> &xf, const std::vector<cv::Mat> &yf)
@@ -268,62 +327,31 @@ cv::Mat KCF::Gaussian_kernel(const std::vector<cv::Mat> &xf, const std::vector<c
 	return kf;
 }
 
-cv::Mat KCF::div_pointwise(const cv::Mat &x,const cv::Mat &y)
-{
-	cv::Mat res;
-	//std::vector<cv::Mat> plane1;
-	//cv::Mat plane1[] = { cv::Mat_<float>(x),cv::Mat::zeros(x.size(),CV_32F) };
-	cv::Mat plane1[2];
-	cv::split(x, plane1);
-	//std::vector<cv::Mat> plane2;
-	//cv::Mat plane2[] = { cv::Mat_<float>(y),cv::Mat::zeros(y.size(),CV_32F) };
-	cv::Mat plane2[2];
-	cv::split(y, plane2);
-	cv::Mat c2_d2 = plane2[0].mul(plane2[0]) + plane2[1].mul(plane2[1]);
-	//cv::Mat res_t[] = { cv::Mat_<float>(y),cv::Mat::zeros(y.size(),CV_32F) };
-	cv::Mat res_t[2];
-	res_t[0] = plane1[0].mul(plane2[0]) + plane1[1].mul(plane2[1]);
-	res_t[0] = res_t[0] / c2_d2;
-	res_t[1] = plane1[1].mul(plane2[0]) - plane1[0].mul(plane2[1]);
-	res_t[1] = res_t[1] / c2_d2;
-	cv::merge(res_t, 2, res);
+//KCF end!
+//***************************************************************************************************************************************
 
-	return res;
+
+
+
+
+
+//***************************************************************************************************************************************
+//BACF Algorithm programed by Zhang Zhen
+//H.K. Galoogahi, A. Fagg, S. Lucey, "Learning Background-Aware Correlation Filters for Visual Tracking," in Proc.of ICCV,2017.
+//BACF begin!
+
+void BACF::init(bbox groundtruth) {
+
+	target_pos.x = (int)groundtruth.x;
+	target_pos.y = (int)groundtruth.y;
+	target_sz.width = groundtruth.w;
+	target_sz.height = groundtruth.h;
+
+	int search_area=(int)(target_sz.width/cell_size)*(target_sz.height/cell_size);
+
 }
 
-cv::Mat KCF::mul_pointwise(const cv::Mat & x, const cv::Mat & y)
-{
-	cv::Mat res;
+bbox BACF::run(cv::Mat img, int frame) {
 
-	cv::Mat plane1[2];
-	cv::split(x, plane1);
-	cv::Mat plane2[2];
-	cv::split(y, plane2);
-
-	cv::Mat res_t[2];
-	res_t[0] = plane1[0].mul(plane2[0]) - plane1[1].mul(plane2[1]);
-	res_t[1] = plane1[0].mul(plane2[1]) + plane1[1].mul(plane2[0]);
-	cv::merge(res_t, 2, res);
-
-	return res;
-}
-
-
-cv::Point KCF::find_max(const cv::Mat &x)
-{
-	cv::Point res;
-
-	float max_x, max_y, max_v = 0;
-	int m = x.cols, n = x.rows;
-	for (int i = 0; i < m; i++) {
-		for (int j = 0; j < n; j++) {
-			if (x.at<float>(j,i) > max_v) {
-				max_v = x.at<float>(j, i);
-				max_x = i;
-				max_y = j;
-			}
-		}
-	}
-
-	return cv::Point(max_x, max_y);
+	return bbox();
 }
